@@ -18,7 +18,7 @@ import jakarta.persistence.EntityManagerFactory;
  * Shard1Config
  */
 @Configuration
-@EnableJpaRepositories(basePackages = "com.example.shardService.repository.shard1", entityManagerFactoryRef = "shared1Emf", transactionManagerRef = "shard1Tx")
+@EnableJpaRepositories(basePackages = "com.example.shardService.repository.shard1", entityManagerFactoryRef = "shard1Emf", transactionManagerRef = "shard1Tx")
 public class Shard1Config {
 
   @Bean
@@ -27,7 +27,7 @@ public class Shard1Config {
         .url("jdbc:h2:mem:shard1;DB_CLOSE_DELAY=1")
         .username("sa")
         .password("")
-        .driverClassName("org.h2.driver")
+        .driverClassName("org.h2.Driver")
         .build();
   }
 
@@ -41,7 +41,7 @@ public class Shard1Config {
     emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
     var props = new java.util.Properties();
-    props.setProperty("hibernate.hbm2ddl", "update");
+    props.setProperty("hibernate.hbm2ddl.auto", "update");
     props.setProperty("hibernate.show_sql", "true");
     emf.setJpaProperties(props);
 
@@ -49,7 +49,7 @@ public class Shard1Config {
   }
 
   @Bean
-  public PlatformTransactionManager shard1tx(
+  public PlatformTransactionManager shard1Tx(
       @Qualifier("shard1Emf") EntityManagerFactory emf) {
     return new JpaTransactionManager(emf);
   }
