@@ -25,4 +25,12 @@ public class ShardRouter {
     int idx = Math.abs(key.hashCode()) % 2;
     return idx == 0 ? shard0 : shard1;
   }
+
+  public Long countShard0() {
+    return shard0.count();
+  }
+
+  public Long countShard1() {
+    return shard1.count();
+  }
 }
