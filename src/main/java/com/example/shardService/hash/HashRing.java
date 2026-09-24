@@ -18,3 +18,7 @@ public class HashRing {
     long hash = hash(node);
     ring.put(hash, node);
   }
+
+  public void removeNode(String node) {
+    ring.remove(hash(node));
+  }
