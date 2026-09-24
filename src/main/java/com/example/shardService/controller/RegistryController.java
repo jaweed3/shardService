@@ -20,3 +20,9 @@ public class RegistryController {
     public RegistryController(ShardRegistry registry) {
         this.registry = registry;
     }
+
+    @PostMapping("/register/{nodeId}")
+    void register(@PathVariable String nodeId) {
+        registry.register(nodeId);
+    }
+
