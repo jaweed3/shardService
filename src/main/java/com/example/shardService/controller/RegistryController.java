@@ -26,3 +26,7 @@ public class RegistryController {
         registry.register(nodeId);
     }
 
+    @PostMapping("/deregister/{nodeId}")
+    void deregister(@PathVariable String nodeId) {
+        registry.deregister(nodeId);
+    }
