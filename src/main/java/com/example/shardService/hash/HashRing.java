@@ -19,12 +19,33 @@ public class HashRing {
         ring.put(hash, node);
     }
 
-    long hash = hash(key);
+    public void addNode(String node, int vnodes) {
+        if (vnodes < 1) {
+            throw new IllegalArgumentException(
+                    "vnodes must be greater than 0");
+        }
 
-    Map.Entry<Long, String> entry = ring.ceilingEntry(hash);
+        for (int i = 0; i < vnodes; i++) {
+            String virtualNode = node + "#" + i;
+            long hash = hash(virtualNode);
 
-    if (entry == null) {
-      entry = ring.firstEntry();
+            ring.put(hash, node);
+        }
+    }
+
+    public void removeNode(String node) {
+        ring.remove(hash(node));
+    }
+
+    public void removeNode(String node, int vnodes) {
+        for (int i = 0; i < vnodes; i++) {
+            String virtualNode = node + "#" + i;
+            ring.remove(hash(virtualNode));
+        }
+    }
+
+    public void clear() {
+        ring.clear();
     }
 
     return entry.getValue();
