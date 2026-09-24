@@ -39,3 +39,17 @@ public class HashRing {
     return entry.getValue();
   }
 
+  private Long hash(String s) {
+    try {
+      var md = MessageDigest.getInstance("MD5");
+      byte[] digest = md.digest(s.getBytes());
+      long h = 0;
+      for (int i = 0; i < 8; i++) {
+        h = (h << 8) | (digest[i] & 0xFF);
+      }
+      return h;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+}
