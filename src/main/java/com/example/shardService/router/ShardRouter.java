@@ -2,13 +2,14 @@ package com.example.shardService.router;
 
 import java.util.Map;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Component;
-
 import com.example.shardService.entity.RecordEntity;
 import com.example.shardService.hash.HashRing;
+import com.example.shardService.registry.ShardRegistry;
 import com.example.shardService.repository.shard0.RecordRepositoryShard0;
 import com.example.shardService.repository.shard1.RecordRepositoryShard1;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Component;
 
 @Component
 /**
@@ -16,30 +17,44 @@ import com.example.shardService.repository.shard1.RecordRepositoryShard1;
  */
 public class ShardRouter {
 
-  private final HashRing ring;
-  private final Map<String, JpaRepository<RecordEntity, String>> repos;
+    private static final int VNODES = 150;
 
-  public ShardRouter(
-      HashRing ring,
-      RecordRepositoryShard0 shard0,
-      RecordRepositoryShard1 shard1) {
-    this.ring = ring;
-    this.repos = Map.of(
-        "shard0", shard0,
-        "shard1", shard1);
+    private final ShardRegistry registry;
+    private final HashRing ring;
+    private final Map<String, JpaRepository<RecordEntity, String>> repos;
 
-    ring.addNode("shard0");
-    ring.addNode("shard1");
-  }
+    public ShardRouter(
+            ShardRegistry registry,
+            HashRing ring,
+            RecordRepositoryShard0 shard0,
+            RecordRepositoryShard1 shard1) {
+        this.registry = registry;
+        this.ring = ring;
+        this.repos = Map.of(
+                "shard0", shard0,
+                "shard1", shard1);
 
-  public JpaRepository<RecordEntity, String> route(String key) {
-    String node = ring.getNode(key);
-    return repos.get(node);
-  }
+        registry.register("shard0");
+        registry.register("shard1");
 
-  public Map<String, Long> countPerShard() {
-    return Map.of(
-        "shard0", repos.get("shard0").count(),
-        "shard1", repos.get("shard1").count());
-  }
+        rebuildRing();
+    }
+
+    public synchronized void rebuildRing() {
+        ring.clear();
+        for (String node : registry.getActiveNodes()) {
+            ring.addNode(node, VNODES);
+        }
+    }
+
+    public JpaRepository<RecordEntity, String> route(String key) {
+        String node = ring.getNode(key);
+        return repos.get(node);
+    }
+
+    public Map<String, Long> countPerShard() {
+        return Map.of(
+                "shard0", repos.get("shard0").count(),
+                "shard1", repos.get("shard1").count());
+    }
 }
