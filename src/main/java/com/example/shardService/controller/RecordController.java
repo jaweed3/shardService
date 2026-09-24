@@ -52,8 +52,6 @@ public class RecordController {
 
   @GetMapping("/debug/count")
   Map<String, Long> count() {
-    return Map.of(
-        "shard0", router.countShard0(),
-        "shard1", router.countShard1());
+    return router.countPerShard();
   }
 }
