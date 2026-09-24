@@ -30,3 +30,9 @@ public class RegistryController {
     void deregister(@PathVariable String nodeId) {
         registry.deregister(nodeId);
     }
+
+    @PostMapping("/heartbeat/{nodeId}")
+    void heartbeat(@PathVariable String nodeId) {
+        registry.heartbeat(nodeId);
+    }
+
