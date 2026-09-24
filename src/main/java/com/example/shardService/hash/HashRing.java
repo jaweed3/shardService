@@ -22,3 +22,20 @@ public class HashRing {
   public void removeNode(String node) {
     ring.remove(hash(node));
   }
+
+  public String getNode(String key) {
+    if (ring.isEmpty()) {
+      throw new IllegalStateException("ring is empty!");
+    }
+
+    long hash = hash(key);
+
+    Map.Entry<Long, String> entry = ring.ceilingEntry(hash);
+
+    if (entry == null) {
+      entry = ring.firstEntry();
+    }
+
+    return entry.getValue();
+  }
+
