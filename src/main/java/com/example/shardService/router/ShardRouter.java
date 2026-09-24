@@ -37,11 +37,9 @@ public class ShardRouter {
     return repos.get(node);
   }
 
-  public Long countShard0() {
-    return shard0.count();
-  }
-
-  public Long countShard1() {
-    return shard1.count();
+  public Map<String, Long> countPerShard() {
+    return Map.of(
+        "shard0", repos.get("shard0").count(),
+        "shard1", repos.get("shard1").count());
   }
 }
