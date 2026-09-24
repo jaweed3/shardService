@@ -12,20 +12,11 @@ import org.springframework.stereotype.Component;
  */
 public class HashRing {
 
-  private final TreeMap<Long, String> ring = new TreeMap<>();
+    private final TreeMap<Long, String> ring = new TreeMap<>();
 
-  public void addNode(String node) {
-    long hash = hash(node);
-    ring.put(hash, node);
-  }
-
-  public void removeNode(String node) {
-    ring.remove(hash(node));
-  }
-
-  public String getNode(String key) {
-    if (ring.isEmpty()) {
-      throw new IllegalStateException("ring is empty!");
+    public void addNode(String node) {
+        long hash = hash(node);
+        ring.put(hash, node);
     }
 
     long hash = hash(key);
