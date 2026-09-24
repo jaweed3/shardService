@@ -1,9 +1,12 @@
 package com.example.shardService.router;
 
+import java.util.Map;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
 import com.example.shardService.entity.RecordEntity;
+import com.example.shardService.hash.HashRing;
 import com.example.shardService.repository.shard0.RecordRepositoryShard0;
 import com.example.shardService.repository.shard1.RecordRepositoryShard1;
 
@@ -13,12 +16,20 @@ import com.example.shardService.repository.shard1.RecordRepositoryShard1;
  */
 public class ShardRouter {
 
-  private final RecordRepositoryShard0 shard0;
-  private final RecordRepositoryShard1 shard1;
+  private final HashRing ring;
+  private final Map<String, JpaRepository<RecordEntity, String>> repos;
 
-  public ShardRouter(RecordRepositoryShard0 shard0, RecordRepositoryShard1 shard1) {
-    this.shard0 = shard0;
-    this.shard1 = shard1;
+  public ShardRouter(
+      HashRing ring,
+      RecordRepositoryShard0 shard0,
+      RecordRepositoryShard1 shard1) {
+    this.ring = ring;
+    this.repos = Map.of(
+        "shard0", shard0,
+        "shard1", shard1);
+
+    ring.addNode("shard0");
+    ring.addNode("shard1");
   }
 
   public JpaRepository<RecordEntity, String> route(String key) {
