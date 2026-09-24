@@ -36,3 +36,7 @@ public class RegistryController {
         registry.heartbeat(nodeId);
     }
 
+    @GetMapping("/nodes")
+    List<String> nodes() {
+        return registry.getActiveNodes();
+    }
