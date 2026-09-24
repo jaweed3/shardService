@@ -33,8 +33,8 @@ public class ShardRouter {
   }
 
   public JpaRepository<RecordEntity, String> route(String key) {
-    int idx = Math.abs(key.hashCode()) % 2;
-    return idx == 0 ? shard0 : shard1;
+    String node = ring.getNode(key);
+    return repos.get(node);
   }
 
   public Long countShard0() {
