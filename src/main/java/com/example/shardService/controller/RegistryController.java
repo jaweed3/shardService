@@ -40,3 +40,9 @@ public class RegistryController {
     List<String> nodes() {
         return registry.getActiveNodes();
     }
+
+    @GetMapping("/status")
+    Map<String, Boolean> status() {
+        return registry.status();
+    }
+}
