@@ -101,9 +101,11 @@ public class ShardRouter {
     }
 
     public Map<String, Long> countPerShard() {
-        return Map.of(
-                "shard0", repos.get("shard0").count(),
-                "shard1", repos.get("shard1").count());
+        Map<String, Long> out = new HashMap<>();
+        for (var e : repos.entrySet()) {
+            out.put(e.getKey(), e.getValue().count());
+        }
+        return out;
     }
 
     public String routeNode(String key) {
