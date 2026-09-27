@@ -71,8 +71,20 @@ public class ShardRouter {
         for (String node : lastKnownNodes) {
             if (!current.contains(node)) {
                 var repo = repos.get(node);
-                if (repo != null)
-                    keysByNode.put(node, repo.findAllKeys());
+
+                if (repo == null)
+                    continue;
+
+                List<String> keysToMove = new ArrayList<>();
+                for (String key : repo.findAllKeys()) {
+                    String newOwner = newRing.getNode(key);
+                    if (!newOwner.equals(node)) {
+                        keysToMove.add(key);
+                    }
+                }
+                if (!keysToMove.isEmpty()) {
+                    keysByNode.put(node, keysToMove);
+                }
             }
         }
 
