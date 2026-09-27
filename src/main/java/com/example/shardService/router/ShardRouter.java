@@ -98,4 +98,10 @@ public class ShardRouter {
         return ring.getNode(key);
     }
 
+    public List<String> allKeys() {
+        List<String> all = new ArrayList<>();
+        all.addAll(repos.get("shard0").findAllKeys());
+        all.addAll(repos.get("shard1").findAllKeys());
+        return all;
+    }
 }
