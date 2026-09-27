@@ -1,14 +1,19 @@
 package com.example.shardService.router;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.example.shardService.entity.RecordEntity;
 import com.example.shardService.hash.HashRing;
+import com.example.shardService.rebalance.Rebalancer;
 import com.example.shardService.registry.ShardRegistry;
+import com.example.shardService.repository.BaseRecordRepository;
 import com.example.shardService.repository.shard0.RecordRepositoryShard0;
 import com.example.shardService.repository.shard1.RecordRepositoryShard1;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,16 +25,19 @@ public class ShardRouter {
     private static final int VNODES = 150;
 
     private final ShardRegistry registry;
-    private final HashRing ring;
-    private final Map<String, JpaRepository<RecordEntity, String>> repos;
+    private final Rebalancer rebalancer;
+    private final Map<String, BaseRecordRepository> repos;
+
+    private HashRing ring = new HashRing();
+    private List<String> lastKnownNodes = List.of();
 
     public ShardRouter(
             ShardRegistry registry,
-            HashRing ring,
+            Rebalancer rebalancer,
             RecordRepositoryShard0 shard0,
             RecordRepositoryShard1 shard1) {
         this.registry = registry;
-        this.ring = ring;
+        this.rebalancer = rebalancer;
         this.repos = Map.of(
                 "shard0", shard0,
                 "shard1", shard1);
@@ -37,14 +45,41 @@ public class ShardRouter {
         registry.register("shard0");
         registry.register("shard1");
 
-        rebuildRing();
+        syncRing();
     }
 
-    public synchronized void rebuildRing() {
-        ring.clear();
-        for (String node : registry.getActiveNodes()) {
-            ring.addNode(node, VNODES);
+    @Scheduled(fixedDelay = 5000)
+    public synchronized void syncRing() {
+        registry.heartbeat("shard0");
+        registry.heartbeat("shard1");
+
+        List<String> current = registry.getActiveNodes();
+
+        if (current.equals(lastKnownNodes)) {
+            return;
         }
+
+        System.out.println("ring changing : " + lastKnownNodes + " -> " + current);
+
+        HashRing newRing = new HashRing();
+        for (String node : current) {
+            newRing.addNode(node, VNODES);
+        }
+
+        Map<String, List<String>> keysByNode = new HashMap<>();
+        for (String node : lastKnownNodes) {
+            if (!current.contains(node)) {
+                var repo = repos.get(node);
+                if (repo != null)
+                    keysByNode.put(node, repo.findAllKeys());
+            }
+        }
+
+        rebalancer.rebalance(ring, newRing, repos, keysByNode);
+        this.ring = newRing;
+        this.lastKnownNodes = current;
+
+        System.out.println("ring rebuilt : " + current);
     }
 
     public JpaRepository<RecordEntity, String> route(String key) {
