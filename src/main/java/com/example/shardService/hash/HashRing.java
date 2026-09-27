@@ -4,9 +4,6 @@ import java.security.MessageDigest;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.springframework.stereotype.Component;
-
-@Component
 /**
  * HashRing
  */
