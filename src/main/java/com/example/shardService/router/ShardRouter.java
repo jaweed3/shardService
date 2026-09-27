@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.shardService.common.HashRing;
 import com.example.shardService.entity.RecordEntity;
-import com.example.shardService.hash.HashRing;
 import com.example.shardService.rebalance.Rebalancer;
 import com.example.shardService.registry.ShardRegistry;
 import com.example.shardService.repository.BaseRecordRepository;
@@ -29,8 +29,8 @@ public class ShardRouter {
     private final Rebalancer rebalancer;
     private final Map<String, BaseRecordRepository> repos;
 
-    private HashRing ring = new HashRing();
-    private List<String> lastKnownNodes = List.of();
+    private volatile HashRing ring = new HashRing();
+    private volatile List<String> lastKnownNodes = List.of();
 
     public ShardRouter(
             ShardRegistry registry,
@@ -51,8 +51,8 @@ public class ShardRouter {
 
     @Scheduled(fixedDelay = 5000)
     public synchronized void syncRing() {
-        registry.heartbeat("shard0");
-        registry.heartbeat("shard1");
+        registry.register("shard0");
+        registry.register("shard1");
 
         List<String> current = registry.getActiveNodes();
 
