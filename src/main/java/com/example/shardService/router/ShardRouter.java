@@ -114,8 +114,9 @@ public class ShardRouter {
 
     public List<String> allKeys() {
         List<String> all = new ArrayList<>();
-        all.addAll(repos.get("shard0").findAllKeys());
-        all.addAll(repos.get("shard1").findAllKeys());
+        for (var repo : repos.values()) {
+            all.addAll(repo.findAllKeys());
+        }
         return all;
     }
 }
