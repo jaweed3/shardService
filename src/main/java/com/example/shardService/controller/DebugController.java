@@ -24,7 +24,7 @@ public class DebugController {
         return router.countPerShard();
     }
 
-    @GetMapping("/debug/route/{key}")
+    @GetMapping("/route/{key}")
     Map<String, String> route(@PathVariable String key) {
         return Map.of("key", key, "node", router.routeNode(key));
     }
