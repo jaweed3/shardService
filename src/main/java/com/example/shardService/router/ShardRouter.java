@@ -1,5 +1,6 @@
 package com.example.shardService.router;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,4 +93,9 @@ public class ShardRouter {
                 "shard0", repos.get("shard0").count(),
                 "shard1", repos.get("shard1").count());
     }
+
+    public String routeNode(String key) {
+        return ring.getNode(key);
+    }
+
 }
