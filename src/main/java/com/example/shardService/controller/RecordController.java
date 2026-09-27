@@ -1,6 +1,8 @@
 package com.example.shardService.controller;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.shardService.entity.RecordEntity;
 import com.example.shardService.router.ShardRouter;
@@ -41,8 +43,15 @@ public class RecordController {
 
     @PutMapping("/{key}")
     ResponseEntity<RecordEntity> put(@PathVariable String key, @RequestBody String value) {
+        String node = router.routeNode(key);
         RecordEntity saved = router.route(key).save(new RecordEntity(key, value));
-        return ResponseEntity.ok(saved);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("key", saved.getKey());
+        body.put("value", saved.getValue());
+        body.put("shardId", node);
+        body.put("nodeId", node);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @DeleteMapping("/{key}")
