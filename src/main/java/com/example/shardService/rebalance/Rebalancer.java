@@ -3,7 +3,7 @@ package com.example.shardService.rebalance;
 import java.util.List;
 import java.util.Map;
 
-import com.example.shardService.hash.HashRing;
+import com.example.shardService.common.HashRing;
 import com.example.shardService.repository.BaseRecordRepository;
 
 import org.springframework.stereotype.Component;
@@ -27,6 +27,10 @@ public class Rebalancer {
         }
     }
 
+    /**
+     * move key from shard `from` ke shart `to`.
+     * trade off: at-most-once, idempotent via existsById check.
+     */
     private void move(
             String key,
             String from,
@@ -36,7 +40,9 @@ public class Rebalancer {
         var toRepo = repos.get(to);
 
         fromRepo.findById(key).ifPresent(entity -> {
-            toRepo.save(entity);
+            if (!toRepo.existsById(key)) {
+                toRepo.save(entity);
+            }
             fromRepo.deleteById(key);
         });
     }
